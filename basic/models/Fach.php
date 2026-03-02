@@ -26,6 +26,7 @@ class Fach extends \yii\db\ActiveRecord
         return 'fach';
     }
 
+
     /**
      * {@inheritdoc}
      */

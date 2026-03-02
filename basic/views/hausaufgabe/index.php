@@ -6,7 +6,6 @@ use yii\helpers\Html;
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Hausaufgaben';
-$this->params['breadcrumbs'][] = $this->title;
 ?>
 
 <style>
@@ -128,6 +127,9 @@ $this->params['breadcrumbs'][] = $this->title;
         text-align: center;
         padding: 60px;
     }
+    .datum-blau  { color: blue; }
+    .datum-gelb  { color: goldenrod; }
+    .datum-rot   { color: red; }
 </style>
 
 <div class="page-header">
@@ -136,7 +138,6 @@ $this->params['breadcrumbs'][] = $this->title;
 </div>
 
 <div class="cards-grid">
-    <?php $models = $dataProvider->getModels(); ?>
     <?php if (empty($models)): ?>
         <div class="empty">Noch keine Hausaufgaben vorhanden.</div>
     <?php else: ?>
@@ -149,7 +150,24 @@ $this->params['breadcrumbs'][] = $this->title;
                 <?php endif; ?>
 
                 <?php if ($model->faelligkeitsdatum): ?>
-                    <div class="ha-datum">📅 <?= date('d.m.Y', strtotime($model->faelligkeitsdatum)) ?></div>
+                    <?php
+                    $faellig = strtotime($model->faelligkeitsdatum);
+                    $now = time();
+                    $diff = $faellig - $now;
+
+                    $colorClass = '';
+                    if ($diff < 86400) {           // < 1 Tag
+                        $colorClass = 'datum-rot';
+                    } elseif ($diff < 604800) {    // < 1 Woche
+                        $colorClass = 'datum-gelb';
+                    } elseif ($diff < 1209600) {   // < 2 Wochen
+                        $colorClass = 'datum-blau';
+                    }
+                    ?>
+
+                    <div class="ha-datum <?= $colorClass ?>">
+                        <?= date('d.m.Y', $faellig) ?>
+                    </div>
                 <?php endif; ?>
 
                 <div>
@@ -159,9 +177,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 </div>
 
                 <div class="ha-actions">
-                    <?= Html::a('Ansehen', ['view', 'id' => $model->hausaufgabenkennung]) ?>
-                    <?= Html::a('Bearbeiten', ['update', 'id' => $model->hausaufgabenkennung]) ?>
-                    <?= Html::a('Löschen', ['delete', 'id' => $model->hausaufgabenkennung], [
+                    <?= Html::a('Ansehen', ['view', 'hausaufgabenkennung' => $model->hausaufgabenkennung]) ?>
+                    <?= Html::a('Bearbeiten', ['update', 'hausaufgabenkennung' => $model->hausaufgabenkennung]) ?>
+                    <?= Html::a('Löschen', ['delete', 'hausaufgabenkennung' => $model->hausaufgabenkennung], [
                             'class' => 'delete',
                             'data' => ['confirm' => 'Wirklich löschen?', 'method' => 'post'],
                     ]) ?>
