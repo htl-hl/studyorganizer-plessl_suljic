@@ -54,6 +54,16 @@ class SiteController extends Controller
         ];
     }
 
+    public function actionRegister()
+    {
+        $model = new \app\models\RegisterForm();
+
+        if ($model->load(Yii::$app->request->post()) && $model->register()) {
+            return $this->redirect(['site/login']);
+        }
+
+        return $this->render('register', ['model' => $model]);
+    }
     /**
      * Displays homepage.
      *
@@ -71,13 +81,9 @@ class SiteController extends Controller
      */
     public function actionLogin()
     {
-        if (!Yii::$app->user->isGuest) {
-            return $this->goHome();
-        }
-
         $model = new LoginForm();
         if ($model->load(Yii::$app->request->post()) && $model->login()) {
-            return $this->goBack();
+            return $this->redirect(['hausaufgabe/index']);
         }
 
         $model->password = '';

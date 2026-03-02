@@ -2,6 +2,8 @@
 
 namespace app\controllers;
 
+use Yii;
+use yii\data\ActiveDataProvider;
 use app\models\Hausaufgabe;
 use app\models\HausaufgabeSearch;
 use yii\web\Controller;
@@ -38,12 +40,11 @@ class HausaufgabeController extends Controller
      */
     public function actionIndex()
     {
-        $searchModel = new HausaufgabeSearch();
-        $dataProvider = $searchModel->search($this->request->queryParams);
+        $userId = Yii::$app->user->id;
+        $models = Hausaufgabe::find()->where(['benutzerkennung' => $userId])->all();
 
         return $this->render('index', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
+            'models' => $models,
         ]);
     }
 
@@ -93,13 +94,18 @@ class HausaufgabeController extends Controller
     {
         $model = $this->findModel($hausaufgabenkennung);
 
-        if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
+        if ($this->request->isPost && $model->load($this->request->post()) && $model->save() && $model->erledigt == false) {
             return $this->redirect(['view', 'hausaufgabenkennung' => $model->hausaufgabenkennung]);
         }
+        if ($model->erledigt == false) {
+            return $this->render('update', [
+                'model' => $model,
+            ]);
+        } else {
+            \Yii::$app->getSession()->setFlash('error', "You can't change this anymore!");
+            return $this->redirect(['index']);
+        }
 
-        return $this->render('update', [
-            'model' => $model,
-        ]);
     }
 
     /**

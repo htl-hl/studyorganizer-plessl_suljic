@@ -6,6 +6,7 @@ $db = require __DIR__ . '/db.php';
 $config = [
     'id' => 'basic',
     'basePath' => dirname(__DIR__),
+    'defaultRoute' => 'site/login',
     'bootstrap' => ['log'],
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
@@ -69,5 +70,6 @@ if (YII_ENV_DEV) {
         'allowedIPs' => ['*'],
     ];
 }
+
 
 return $config;

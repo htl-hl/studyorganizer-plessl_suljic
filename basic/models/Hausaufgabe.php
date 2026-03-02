@@ -30,6 +30,16 @@ class Hausaufgabe extends \yii\db\ActiveRecord
         return 'hausaufgabe';
     }
 
+    public static function getFaecherList()
+    {
+        return [
+            1 => 'Mathematik',
+            2 => 'Deutsch',
+            3 => 'Englisch',
+            4 => 'Physik',
+        ];
+    }
+
     /**
      * {@inheritdoc}
      */

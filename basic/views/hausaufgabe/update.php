@@ -6,9 +6,7 @@ use yii\helpers\Html;
 /** @var app\models\Hausaufgabe $model */
 
 $this->title = 'Update Hausaufgabe: ' . $model->hausaufgabenkennung;
-$this->params['breadcrumbs'][] = ['label' => 'Hausaufgabes', 'url' => ['index']];
-$this->params['breadcrumbs'][] = ['label' => $model->hausaufgabenkennung, 'url' => ['view', 'hausaufgabenkennung' => $model->hausaufgabenkennung]];
-$this->params['breadcrumbs'][] = 'Update';
+
 ?>
 <div class="hausaufgabe-update">
 
