@@ -32,12 +32,11 @@ class Hausaufgabe extends \yii\db\ActiveRecord
 
     public static function getFaecherList()
     {
-        return [
-            1 => 'Mathematik',
-            2 => 'Deutsch',
-            3 => 'Englisch',
-            4 => 'Physik',
-        ];
+        return \yii\helpers\ArrayHelper::map(
+            Fach::find()->all(),
+            'fachkennung',
+            'name'
+        );
     }
 
     /**
@@ -53,8 +52,8 @@ class Hausaufgabe extends \yii\db\ActiveRecord
             [['faelligkeitsdatum'], 'safe'],
             [['erledigt', 'fachkennung', 'benutzerkennung'], 'integer'],
             [['titel'], 'string', 'max' => 255],
-            [['fachkennung'], 'exist', 'skipOnError' => true, 'targetClass' => Fach::class, 'targetAttribute' => ['fachkennung' => 'fachkennung']],
-            [['benutzerkennung'], 'exist', 'skipOnError' => true, 'targetClass' => Benutzer::class, 'targetAttribute' => ['benutzerkennung' => 'benutzerkennung']],
+            [['fachkennung'], 'exist', 'targetClass' => Fach::class, 'targetAttribute' => ['fachkennung' => 'fachkennung']],
+            [['benutzerkennung'], 'exist', 'targetClass' => Benutzer::class, 'targetAttribute' => ['benutzerkennung' => 'benutzerkennung']],
         ];
     }
 
