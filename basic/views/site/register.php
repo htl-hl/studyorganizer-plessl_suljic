@@ -15,12 +15,6 @@ $this->title = 'Registrieren';
 
             <?= $form->field($model, 'passwort')->passwordInput() ?>
 
-            <?= $form->field($model, 'rolle')->dropDownList([
-                'schueler' => 'Schüler',
-                'lehrer' => 'Lehrer',
-                'admin' => 'Admin',
-            ]) ?>
-
             <div class="form-group">
                 <?= Html::submitButton('Registrieren', ['class' => 'btn btn-success']) ?>
                 <?= Html::a('Zurück zum Login', ['site/login'], ['class' => 'btn btn-secondary']) ?>

@@ -2,11 +2,13 @@
 
 namespace app\controllers;
 
+use Yii;
 use app\models\Benutzer;
 use app\models\Benutzersearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\filters\AccessControl;
 
 /**
  * BenutzerController implements the CRUD actions for Benutzer model.
@@ -21,6 +23,18 @@ class BenutzerController extends Controller
         return array_merge(
             parent::behaviors(),
             [
+                'access' => [
+                    'class' => AccessControl::class,
+                    'rules' => [
+                        [
+                            'allow' => true,
+                            'roles' => ['@'],
+                            'matchCallback' => function ($rule, $action) {
+                                return Yii::$app->user->identity->rolle === 'admin';
+                            }
+                        ],
+                    ],
+                ],
                 'verbs' => [
                     'class' => VerbFilter::className(),
                     'actions' => [
@@ -70,8 +84,11 @@ class BenutzerController extends Controller
         $model = new Benutzer();
 
         if ($this->request->isPost) {
-            if ($model->load($this->request->post()) && $model->save()) {
-                return $this->redirect(['view', 'benutzerkennung' => $model->benutzerkennung]);
+            if ($model->load($this->request->post())) {
+                 $model->passwort_hash = Yii::$app->security->generatePasswordHash($model->passwort_hash);
+                 if($model->save()) {
+                     return $this->redirect(['view', 'benutzerkennung' => $model->benutzerkennung]);
+                 }
             }
         } else {
             $model->loadDefaultValues();
@@ -93,8 +110,25 @@ class BenutzerController extends Controller
     {
         $model = $this->findModel($benutzerkennung);
 
-        if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'benutzerkennung' => $model->benutzerkennung]);
+        // Backup existing password hash
+        $oldPassHash = $model->passwort_hash;
+
+        if ($this->request->isPost && $model->load($this->request->post())) {
+            // Only hash if the password field was changed (simple check, or you might need a different logic)
+            // Ideally we wouldn't load passwort_hash directly from post if it's meant to be a raw password.
+            // Assuming for now the admin inputs a new password in the form field mapped to 'passwort_hash'
+            // But usually we should have a separate field in the form for plain text password.
+            
+            // For now, let's assume if the input is different from old hash, it's a new password
+            if ($model->passwort_hash != $oldPassHash && !empty($model->passwort_hash)) {
+                 $model->passwort_hash = Yii::$app->security->generatePasswordHash($model->passwort_hash);
+            } else {
+                $model->passwort_hash = $oldPassHash;
+            }
+
+            if($model->save()) {
+                return $this->redirect(['view', 'benutzerkennung' => $model->benutzerkennung]);
+            }
         }
 
         return $this->render('update', [

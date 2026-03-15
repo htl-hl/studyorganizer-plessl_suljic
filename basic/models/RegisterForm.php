@@ -15,7 +15,6 @@ class RegisterForm extends Model
         return [
             [['benutzername', 'passwort'], 'required'],
             [['benutzername', 'passwort'], 'string', 'max' => 255],
-            ['rolle', 'in', 'range' => ['admin', 'lehrer', 'schueler']],
         ];
     }
 
@@ -26,7 +25,7 @@ class RegisterForm extends Model
         $user = new User();
         $user->benutzername = $this->benutzername;
         $user->passwort_hash = Yii::$app->security->generatePasswordHash($this->passwort);
-        $user->rolle = $this->rolle;
+        $user->rolle = 'schueler'; // Immer als 'schueler' registrieren
 
         return $user->save();
     }

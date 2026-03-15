@@ -5,6 +5,7 @@ $db = require __DIR__ . '/db.php';
 
 $config = [
     'id' => 'basic',
+    'name' => 'Studyorganizer',
     'basePath' => dirname(__DIR__),
     'defaultRoute' => 'site/login',
     'bootstrap' => ['log'],

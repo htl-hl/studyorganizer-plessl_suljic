@@ -134,7 +134,9 @@ $this->title = 'Hausaufgaben';
 
 <div class="page-header">
     <h1>Hausaufgaben</h1>
-    <?= Html::a('+ Neue Aufgabe', ['create'], ['class' => 'btn-neu']) ?>
+    <?php if (!Yii::$app->user->isGuest && Yii::$app->user->identity->rolle !== 'schueler'): ?>
+        <?= Html::a('+ Neue Aufgabe', ['create'], ['class' => 'btn-neu']) ?>
+    <?php endif; ?>
 </div>
 
 <div class="cards-grid">
@@ -178,11 +180,13 @@ $this->title = 'Hausaufgaben';
 
                 <div class="ha-actions">
                     <?= Html::a('Ansehen', ['view', 'hausaufgabenkennung' => $model->hausaufgabenkennung]) ?>
-                    <?= Html::a('Bearbeiten', ['update', 'hausaufgabenkennung' => $model->hausaufgabenkennung]) ?>
-                    <?= Html::a('Löschen', ['delete', 'hausaufgabenkennung' => $model->hausaufgabenkennung], [
-                            'class' => 'delete',
-                            'data' => ['confirm' => 'Wirklich löschen?', 'method' => 'post'],
-                    ]) ?>
+                    <?php if (!Yii::$app->user->isGuest && Yii::$app->user->identity->rolle !== 'schueler'): ?>
+                        <?= Html::a('Bearbeiten', ['update', 'hausaufgabenkennung' => $model->hausaufgabenkennung]) ?>
+                        <?= Html::a('Löschen', ['delete', 'hausaufgabenkennung' => $model->hausaufgabenkennung], [
+                                'class' => 'delete',
+                                'data' => ['confirm' => 'Wirklich löschen?', 'method' => 'post'],
+                        ]) ?>
+                    <?php endif; ?>
                 </div>
             </div>
         <?php endforeach; ?>
