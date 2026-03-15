@@ -8,7 +8,9 @@ use app\models\Hausaufgabe;
 use app\models\HausaufgabeSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
+use yii\web\ForbiddenHttpException;
 use yii\filters\VerbFilter;
+use yii\filters\AccessControl;
 
 /**
  * HausaufgabeController implements the CRUD actions for Hausaufgabe model.
@@ -23,6 +25,15 @@ class HausaufgabeController extends Controller
         return array_merge(
             parent::behaviors(),
             [
+                'access' => [
+                    'class' => AccessControl::class,
+                    'rules' => [
+                        [
+                            'allow' => true,
+                            'roles' => ['@'],
+                        ],
+                    ],
+                ],
                 'verbs' => [
                     'class' => VerbFilter::className(),
                     'actions' => [
@@ -40,8 +51,13 @@ class HausaufgabeController extends Controller
      */
     public function actionIndex()
     {
-        $userId = Yii::$app->user->id;
-        $models = Hausaufgabe::find()->where(['benutzerkennung' => $userId])->all();
+        $user = Yii::$app->user->identity;
+        
+        if ($user->rolle === 'admin' || $user->rolle === 'lehrer') {
+             $models = Hausaufgabe::find()->all();
+        } else {
+             $models = Hausaufgabe::find()->where(['benutzerkennung' => $user->benutzerkennung])->all();
+        }
 
         return $this->render('index', [
             'models' => $models,
@@ -56,8 +72,10 @@ class HausaufgabeController extends Controller
      */
     public function actionView($hausaufgabenkennung)
     {
+        $model = $this->findModel($hausaufgabenkennung);
+        $this->checkAccess($model);
         return $this->render('view', [
-            'model' => $this->findModel($hausaufgabenkennung),
+            'model' => $model,
         ]);
     }
 
@@ -71,8 +89,11 @@ class HausaufgabeController extends Controller
         $model = new Hausaufgabe();
 
         if ($this->request->isPost) {
-            if ($model->load($this->request->post()) && $model->save()) {
-                return $this->redirect(['view', 'hausaufgabenkennung' => $model->hausaufgabenkennung]);
+            if ($model->load($this->request->post())) {
+                $model->benutzerkennung = Yii::$app->user->id;
+                if ($model->save()) {
+                    return $this->redirect(['view', 'hausaufgabenkennung' => $model->hausaufgabenkennung]);
+                }
             }
         } else {
             $model->loadDefaultValues();
@@ -93,19 +114,20 @@ class HausaufgabeController extends Controller
     public function actionUpdate($hausaufgabenkennung)
     {
         $model = $this->findModel($hausaufgabenkennung);
+        $this->checkAccess($model);
 
-        if ($this->request->isPost && $model->load($this->request->post()) && $model->save() && $model->erledigt == false) {
-            return $this->redirect(['view', 'hausaufgabenkennung' => $model->hausaufgabenkennung]);
-        }
-        if ($model->erledigt == false) {
-            return $this->render('update', [
-                'model' => $model,
-            ]);
-        } else {
-            \Yii::$app->getSession()->setFlash('error', "You can't change this anymore!");
-            return $this->redirect(['index']);
+        if ($model->erledigt) {
+             \Yii::$app->getSession()->setFlash('error', "You can't change this anymore!");
+             return $this->redirect(['index']);
         }
 
+        if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
+             return $this->redirect(['view', 'hausaufgabenkennung' => $model->hausaufgabenkennung]);
+        }
+
+        return $this->render('update', [
+            'model' => $model,
+        ]);
     }
 
     /**
@@ -117,7 +139,9 @@ class HausaufgabeController extends Controller
      */
     public function actionDelete($hausaufgabenkennung)
     {
-        $this->findModel($hausaufgabenkennung)->delete();
+        $model = $this->findModel($hausaufgabenkennung);
+        $this->checkAccess($model);
+        $model->delete();
 
         return $this->redirect(['index']);
     }
@@ -136,5 +160,17 @@ class HausaufgabeController extends Controller
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+    protected function checkAccess($model)
+    {
+        $user = Yii::$app->user->identity;
+        if ($user->rolle === 'admin' || $user->rolle === 'lehrer') {
+            return true;
+        }
+        if ($model->benutzerkennung == $user->benutzerkennung) {
+            return true;
+        }
+        throw new ForbiddenHttpException('You are not allowed to perform this action.');
     }
 }

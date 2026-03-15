@@ -1,7 +1,6 @@
 <?php
 
 /** @var yii\web\View $this */
-
 /** @var string $content */
 
 use app\assets\AppAsset;
@@ -33,17 +32,40 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
 <header id="header">
     <?php
     NavBar::begin([
-            'brandLabel' => Yii::$app->name,
-            'brandUrl' => Yii::$app->homeUrl,
-            'options' => ['class' => 'navbar-expand-md navbar-dark bg-dark fixed-top']
+        'brandLabel' => Yii::$app->name,
+        'brandUrl' => Yii::$app->homeUrl,
+        'options' => ['class' => 'navbar-expand-md navbar-dark bg-dark fixed-top']
     ]);
+
+    $navItems = [];
+    if (Yii::$app->user->isGuest) {
+        $navItems[] = ['label' => 'Login', 'url' => ['/site/login']];
+        $navItems[] = ['label' => 'Register', 'url' => ['/site/register']];
+    } else {
+        /** @var \app\models\User $user */
+        $user = Yii::$app->user->identity;
+
+        $navItems[] = ['label' => 'Hausaufgaben', 'url' => ['/hausaufgabe/index']];
+
+        if ($user->rolle === 'admin') {
+            $navItems[] = ['label' => 'Benutzer', 'url' => ['/benutzer/index']];
+            $navItems[] = ['label' => 'Fach', 'url' => ['/fach/index']];
+        }
+
+        $navItems[] = '<li>'
+            . Html::beginForm(['/site/logout'], 'post', ['class' => 'form-inline'])
+            . Html::submitButton(
+                'Logout (' . Html::encode($user->benutzername) . ')',
+                ['class' => 'btn btn-link logout']
+            )
+            . Html::endForm()
+            . '</li>';
+    }
+
     echo Nav::widget([
-            'options' => ['class' => 'navbar-nav'],
-            'items' => [
-                    ['label' => 'Hausaufgaben', 'url' => ['/hausaufgabe/index']],
-                    ['label' => 'Benutzer', 'url' => ['/benutzer/index']],
-                    ['label' => 'Fach', 'url' => ['/fach/index']],
-            ]
+        'options' => ['class' => 'navbar-nav'],
+        'items' => $navItems,
+        'encodeLabels' => false
     ]);
     NavBar::end();
     ?>
@@ -62,7 +84,7 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
 <footer id="footer" class="mt-auto py-3 bg-light">
     <div class="container">
         <div class="row text-muted">
-            <div class="col-md-6 text-center text-md-start">&copy; My Company <?= date('Y') ?></div>
+            <div class="col-md-6 text-center text-md-start">&copy; PlesslSuljic <?= date('Y') ?></div>
             <div class="col-md-6 text-center text-md-end"><?= Yii::powered() ?></div>
         </div>
     </div>
